@@ -3,12 +3,23 @@
 /* 1) 调色板 */
 body[data-dsh-arknights] {
   color-scheme: dark;
-  --dsw-alias-bg-base: rgba(10, 11, 13, 0.38);
-  --dsw-alias-bg-layer-1: rgba(13, 15, 18, 0.58);
-  --dsw-alias-bg-layer-2: rgba(16, 19, 23, 0.52);
-  --dsw-alias-bg-layer-3: rgba(19, 23, 27, 0.48);
-  --dsw-alias-bg-mask-1: rgba(4, 6, 9, 0.3);
-  --dsw-alias-bg-module-platform: rgba(10, 11, 13, 0.45);
+  /* ⚠ 这些"大面"变量必须带 !important：
+     ui-theme 的调色板规则是 body[data-ds-dark-theme]{...}（特异性 0,1,1），
+     与 body[data-dsh-arknights] 完全相同；当 DSH 重新注入调色板样式表
+     （切换浅色/深色、外观变更导致 effect 重跑）时它会排在本皮肤 <style> 之后，
+     同特异性下后者胜出 → bg-base 变回不透明 → 背景插画被整个盖住。
+     强制 !important 可让插画在两种外观下都稳定可见。 */
+  --dsw-alias-bg-base: rgba(10, 11, 13, 0.38) !important;
+  --dsw-alias-bg-layer-1: rgba(13, 15, 18, 0.58) !important;
+  --dsw-alias-bg-layer-2: rgba(16, 19, 23, 0.52) !important;
+  --dsw-alias-bg-layer-3: rgba(19, 23, 27, 0.48) !important;
+  --dsw-alias-bg-mask-1: rgba(4, 6, 9, 0.3) !important;
+  --dsw-alias-bg-module-platform: rgba(10, 11, 13, 0.45) !important;
+  /* 侧栏底色：核心给它的是不透明 --dsw-specific-sidebar-fill（深色 #1b1b1c / 浅色近白）。
+     不透明会有两个后果：① 侧栏列上的渐变完全看不见；② 浅色模式下侧栏变白，
+     而本皮肤把侧栏文字统一改成近白 → 文字"消失"，看起来就是侧栏没被主题化。
+     改成半透明深色后，侧栏在两种外观下都统一，且能透出背景插画。 */
+  --dsw-specific-sidebar-fill: rgba(8, 9, 11, 0.72) !important;
   --dsw-alias-border-l1: rgba(255, 255, 255, 0.1);
   --dsw-alias-border-l2: rgba(255, 255, 255, 0.16);
   --dsw-alias-border-l3: rgba(53, 200, 245, 0.4);
@@ -81,11 +92,15 @@ body[data-dsh-arknights] * {
   border-radius: 0 !important;
 }
 
-/* 3) 侧栏 */
+/* 3) 侧栏
+   ⚠ 切勿在此处添加 backdrop-filter / filter / transform / will-change / contain！
+   [class*='sidebarCol'] 是设置弹窗（.VOzbGW_overlay, position:fixed; inset:0）的祖先盒，
+   上述属性会使其成为 fixed 后代的包含块，导致整个设置弹窗被压缩进侧栏宽度并被裁切。
+   另：该列的渐变背景会被内层 .hHd-Xa_root 的不透明 --dsw-specific-sidebar-fill 覆盖，
+   模糊本来也看不出来，故此处不保留 backdrop-filter。 */
 body[data-dsh-arknights] [data-slot='sidebar'],
 body[data-dsh-arknights] [class*='sidebarCol'] {
   background: linear-gradient(180deg, rgba(11, 12, 14, 0.74) 0%, rgba(16, 19, 21, 0.66) 100%) !important;
-  backdrop-filter: blur(6px);
 }
 
 body[data-dsh-arknights] [data-slot='sidebar'] :is(span, div, p, a, button, h1, h2, h3, h4, label, li) {
@@ -123,8 +138,56 @@ body[data-dsh-arknights] [data-slot='sidebar'] [class*='newSession'] > * {
   background: transparent !important;
 }
 
+/* 3.9) 工作区浏览器（侧栏 Workspaces 区块）
+   皮肤此前只统一了侧栏文字色，工作区区块本身（组标题 / 会话行 / 搜索框 / 渐隐遮罩）
+   仍是 DSH 默认外观，看起来就是"工作区没被主题化"。这里把它并入主题语言：
+   等宽大写小标题 + 青色强调 + 悬停/选中的青色高亮条。
+   以下选择器全部限定在 [data-slot='sidebar'] 内 —— 这些类名（*_sessionRow、
+   *_iconButton 等）在右栏/其它面板也在用，不限定会波及全站。 */
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='sectionHeader'] {
+  border-bottom: 1px solid rgba(53, 200, 245, 0.2) !important;
+}
+
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='sectionLabel'] {
+  color: rgba(53, 200, 245, 0.78) !important;
+  font-family: ui-monospace, Consolas, monospace !important;
+  font-size: 11px !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase;
+}
+
+/* 会话 / 工作区行：左侧状态条 + 青色悬停
+   注意不要动 *_sectionLabelHidden 的 opacity/visibility，那是收起动画在用的。 */
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='sessionRow'],
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='projectRow'],
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='searchResultRow'] {
+  border-left: 2px solid transparent;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='sessionRow']:hover,
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='projectRow']:hover,
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='searchResultRow']:hover {
+  background: rgba(53, 200, 245, 0.1) !important;
+  border-left-color: rgba(53, 200, 245, 0.55) !important;
+}
+
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='sessionRow'][class*='selected'],
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='projectRow'][class*='selected'],
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='searchResultRow'][class*='selected'] {
+  background: rgba(53, 200, 245, 0.16) !important;
+  border-left-color: #35c8f5 !important;
+}
+
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='searchButton']:hover,
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='clearButton']:hover,
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='iconButton']:hover {
+  background: rgba(53, 200, 245, 0.16) !important;
+}
+
+/* 列表底部渐隐：跟随第 3) 条的半透明侧栏底色，避免出现一道不透明的黑边 */
 body[data-dsh-arknights] [data-slot='sidebar'] [class*='fade'] {
-  background: linear-gradient(rgba(11, 12, 14, 0), #0b0c0e) !important;
+  background: linear-gradient(to bottom, transparent, rgba(8, 9, 11, 0.9)) !important;
 }
 
 /* 3.8) 聊天气泡：用户消息气泡暗色化（硬编码浅蓝底的组件） */
@@ -397,12 +460,20 @@ body[data-dsh-arknights] [data-slot='sidebar'] button[class*='newSession']::befo
   animation: ak-icon-pulse 3.5s ease-in-out infinite;
 }
 
+/* 徽记槽位：DSH 的 slot 锚点可能是 display:contents 的"零尺寸"包裹层，
+   此时给它写 background 不会画出任何东西 —— 收起的侧栏轨道里于是只剩一个空按钮，
+   图标看不见（展开态因为有内层 svg 兜底不明显）。
+   这里强制让它自己生成一个盒子（inline-flex），背景才能在锚点上真正绘制。 */
 body[data-dsh-arknights] [data-slot='sidebar.brand.mark'] img,
 body[data-dsh-arknights] [data-slot='sidebar.brand.mark'] svg {
   display: none !important;
 }
 
 body[data-dsh-arknights] [data-slot='sidebar.brand.mark'] {
+  display: inline-flex !important;
+  justify-content: center;
+  align-items: center;
+  flex: none;
   background: url(./assets/ak-emblem-wing.png) center/contain no-repeat !important;
   min-width: 26px;
   min-height: 26px;

@@ -1,4 +1,4 @@
-# 明日方舟皮肤插件 — 新机器一键安装脚本
+﻿# 明日方舟皮肤插件 — 新机器一键安装脚本
 # 用法：在新电脑上把整个 dsh-arknights-skin 文件夹放到任意位置，
 #       右键此文件 → "使用 PowerShell 运行"，或执行：
 #       powershell -ExecutionPolicy Bypass -File install-new-machine.ps1
@@ -52,3 +52,4 @@ foreach ($profileName in @("web", "desktop")) {
 
 Write-Host ""
 Write-Host "完成。重启 DSH Desktop 即可生效。" -ForegroundColor Cyan
+
