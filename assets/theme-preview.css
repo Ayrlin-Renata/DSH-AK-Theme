@@ -47,6 +47,15 @@ body[data-dsh-arknights] {
   --dsw-alias-hovercard-bg: rgba(16, 18, 21, 0.96);
   --dsw-alias-tooltip-bg: rgba(16, 18, 21, 0.96);
 
+  /* 1.1) 左栏专用官方 token（浅色主题下这几个默认是近白色，不覆盖则左栏全白） */
+  /* --dsw-specific-sidebar-fill：侧栏列 + 标题行的底色，由 layout 的 sidebarCol/frame
+     和 sidebar 的 root 同时消费，是「左栏全白」的唯一根因 */
+  --dsw-specific-sidebar-fill: rgba(11, 12, 14, 0.74);
+  /* 其余为侧栏内部控件消费、且在浅色主题下写死浅色的 token */
+  --dsw-alias-button-elevated-fill: rgba(19, 23, 27, 0.72);
+  --dsw-alias-button-floating-hover: rgba(255, 255, 255, 0.1);
+  --dsw-alias-scrollbar-hover-l2: rgba(255, 255, 255, 0.18);
+
   /* shadcn 风格变量（侧栏/面板同时在用的另一套） */
   --background: #0a0b0d;
   --foreground: #f4f7f9;
@@ -86,6 +95,13 @@ body[data-dsh-arknights] [data-slot='sidebar'],
 body[data-dsh-arknights] [class*='sidebarCol'] {
   background: linear-gradient(180deg, rgba(11, 12, 14, 0.74) 0%, rgba(16, 19, 21, 0.66) 100%) !important;
   backdrop-filter: blur(6px);
+}
+
+/* 3.1) 侧栏内层根（slot 包装层的直接子元素）：清掉 DSH 自己的侧栏底色，
+   统一由上面那层暗色玻璃负责。DSH 换过侧栏底色 token 时这里不会再「露白」 */
+body[data-dsh-arknights] [data-slot='sidebar'] > * {
+  background-color: transparent !important;
+  background-image: none !important;
 }
 
 body[data-dsh-arknights] [data-slot='sidebar'] :is(span, div, p, a, button, h1, h2, h3, h4, label, li) {
