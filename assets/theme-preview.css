@@ -168,6 +168,13 @@ body[data-dsh-arknights] [class*='sidebarCol'] {
   backdrop-filter: blur(6px);
 }
 
+/* 3.0) 侧栏与正文交界：layout 的 sidebarCol 用 border-right + --dsw-alias-border-l3 画线，
+   皮肤把 border-l3 设成青色 0.4 → 那条贯穿全高的青色竖线就是"边界上的竖光"。
+   这里只压这一处的颜色（不动全局 border-l3，弹窗/卡片还要用）。 */
+body[data-dsh-arknights] [class*='sidebarCol'] {
+  border-right-color: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* 3.1) 侧栏内层根（slot 包装层的直接子元素）：清掉 DSH 自己的侧栏底色，
    统一由上面那层暗色玻璃负责。DSH 换过侧栏底色 token 时这里不会再「露白」 */
 body[data-dsh-arknights] [data-slot='sidebar'] > * {
@@ -638,20 +645,8 @@ body[data-dsh-arknights] [data-slot='sidebar.brand.mark'] {
   color: rgba(255, 255, 255, 0.45);
 }
 
-#ak-decor .ak-deco-rail {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 2px;
-  /* 原来是 3px 实心 #35c8f5（纯色、上下硬切）→ 一条贴边的刺眼亮线。
-     改成半透明 + 两端淡出，保留"流光"但不再是硬边。 */
-  background: linear-gradient(180deg, rgba(53, 200, 245, 0.42) 0%, rgba(53, 200, 245, 0.05) 45%, rgba(53, 200, 245, 0.42) 100%);
-  background-size: 100% 300%;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
-  animation: ak-rail-flow 8s linear infinite;
-}
+/* 左缘流光竖线已按需求移除（原 .ak-deco-rail：贴窗口左缘、贯穿整屏的青色竖光）。
+   元素与样式一起删掉，避免只删样式还在 DOM 里留一个空节点。 */
 
 #ak-decor .ak-deco-hazard {
   position: absolute;
@@ -684,21 +679,9 @@ body[data-dsh-arknights] [data-slot='sidebar.brand.mark'] {
 }
 
 /* ── 动效（全部 transform/opacity） ── */
-@keyframes ak-scan-sweep {
-  0% { transform: translateX(-30%); opacity: 0; }
-  15% { opacity: 0.75; }
-  85% { opacity: 0.75; }
-  100% { transform: translateX(190%); opacity: 0; }
-}
-
 @keyframes ak-ghost-breathe {
   0%, 100% { opacity: 0.55; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.018); }
-}
-
-@keyframes ak-rail-flow {
-  0% { background-position: 0% 0; }
-  100% { background-position: 0% 300%; }
 }
 
 @keyframes ak-hazard-scroll {
@@ -741,18 +724,8 @@ body[data-dsh-arknights] [data-slot='sidebar.brand.mark'] {
   overflow: hidden;
 }
 
-#ak-decor-top .ak-deco-sweep {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 26%;
-  /* 峰值 0.09 → 0.055 并把过渡拉宽到 40%/60%：扫光变得更"化"，掠过时不再有一条
-     能看出边界的亮带。周期仍是 9s。 */
-  background: linear-gradient(100deg, transparent, rgba(53, 200, 245, 0.028) 40%, rgba(53, 200, 245, 0.055) 50%, rgba(53, 200, 245, 0.028) 60%, transparent);
-  transform: translateX(-30%);
-  animation: ak-scan-sweep 9s ease-in-out infinite;
-}
+/* 扫光带已按需求移除（原 .ak-deco-sweep：26vw 宽、贯穿全屏高，9s 横扫一次的青色竖光带，
+   是主题里唯一"会动的竖光"）。样式、keyframes、DOM 节点一起删。 */
 
 /* 顶层装饰字符：边缘竖排 + 十六进制码 + 刻度条 */
 #ak-decor-top .ak-deco-vl,
