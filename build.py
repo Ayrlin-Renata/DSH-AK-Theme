@@ -208,6 +208,60 @@ body[data-dsh-arknights] [data-slot='sidebar'] [class*='fade'] {
   background: linear-gradient(to bottom, transparent, rgba(8, 9, 11, 0.9)) !important;
 }
 
+/* 3.9.1) 收起态：注入的 .ak-ws-en 会把工作区图标挤出侧栏
+   侧栏收起后 DSH 只保留 56px 轨道，组标题 <span class="*_sectionLabel"> 会被整个
+   卸载（React 里是 `wide &&` 条件渲染），但本皮肤注入的 .ak-ws-en 是普通 DOM 节点，
+   React 不管它 —— 它会作为一个 display:block 的 flex 子项留在 36px 高的
+   sectionHeader 里，把后面 margin-left:auto 的搜索/新建工作区按钮推到侧栏右边界
+   之外，被 *root 的 overflow:hidden 裁掉（实测：侧栏 R=55，按钮 R=57）。
+   DSH 官方的隐藏类 *_sectionLabelHidden 对它是无效的（它不是 sectionLabel）。
+   修法：组标题不存在（收起态）或正处于隐藏动画时，同步隐藏 .ak-ws-en。 */
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='sectionHeader']:not(:has([class*='sectionLabel'])) > .ak-ws-en,
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='sectionHeader']:has([class*='sectionLabelHidden']) > .ak-ws-en {
+  display: none !important;
+}
+
+/* 兜底：即使它可见，也不允许它撑开轨道宽度 */
+body[data-dsh-arknights] [data-slot='sidebar'] .ak-ws-en {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* 3.9.2) 第三方侧栏入口按钮的收起态兜底
+   有些插件把"轨道态"样式挂在 body[data-dsh-sidebar-collapsed] 上
+   （例如 dsh-session-surgeon 的 [data-dsh-surgeon-entry]），但 DSH 核心从不设置
+   该属性（全量检索 .pnpm 下的 DSH 包，data-dsh-sidebar-collapsed 零命中），
+   于是那些规则永远不生效：按钮在 56px 轨道里保持展开态的整行宽高，文字标签
+   也留在原地，看起来就是"坏了"。这里按真实信号（侧栏根节点上的 *_collapsed 类）
+   补一份等价样式，插件本身无需改动。选择器用后缀匹配以适配 CSS Module 哈希前缀，
+   并限定在 [data-slot='sidebar'] 内，避免影响其它区域同名属性的元素。 */
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='collapsed'] [data-dsh-surgeon-entry],
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='collapsed'] [data-dsh-taskboard-entry],
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='collapsed'] [data-dsh-ssh-entry] {
+  box-sizing: border-box !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  max-height: 36px !important;
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+  flex: none !important;
+  align-self: flex-start !important;
+  justify-content: center !important;
+  align-items: center !important;
+  display: flex !important;
+  overflow: hidden !important;
+  color: var(--dsw-alias-label-primary) !important;
+}
+
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='collapsed'] [data-dsh-surgeon-entry] span[data-label],
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='collapsed'] [data-dsh-taskboard-entry] span[data-label],
+body[data-dsh-arknights] [data-slot='sidebar'] [class*='collapsed'] [data-dsh-ssh-entry] span[data-label] {
+  display: none !important;
+}
+
 /* 3.8) 聊天气泡：用户消息气泡暗色化（硬编码浅蓝底的组件） */
 body[data-dsh-arknights] [class*='bubble'] {
   background: rgba(53, 200, 245, 0.09) !important;
